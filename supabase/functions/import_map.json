@@ -10,6 +10,7 @@
  
  
         "@supabase": "npm:@supabase/supabase-js",
-        "@V4": "https://deno.land/x/uuid@v0.1.2/mod.ts"
+        "@V4": "https://deno.land/x/uuid@v0.1.2/mod.ts",
+        "@aws-sdk/client-s3": "npm:@aws-sdk/client-s3"
     }
 }
