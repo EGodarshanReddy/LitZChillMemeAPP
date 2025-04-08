@@ -24,6 +24,10 @@ export async function uploadUserProfilePhotoToAWSS3(
     const formData = await req.formData();
     const file = formData.get("file") as File;
 
+
+
+
+    
     if (!file || !(file instanceof File)) {
       return ErrorResponse(
         HTTP_STATUS_CODE.BAD_REQUEST,
