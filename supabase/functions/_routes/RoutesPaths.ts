@@ -11,7 +11,8 @@ export const USER_MODULE_ROUTES = {
     UPDATE_PHOTO:"/UserModule/UpdatePhoto/:id/:profile",
     CREATE_OTP_SETTINGS:"/UserModule/CreateOTPSettings",
     UPDATE_OTP_SETTINGS:"/UserModule/UpdateOTPSettings/:id",
-    DELETE_OTP_SETTINGS:"/UserModule/DeleteOTPSettings/:id"
+    DELETE_OTP_SETTINGS:"/UserModule/DeleteOTPSettings/:id",
+    UPLOAD_PROFILE_TO_S3_BUCKET:"/UserModule/UploadProfileToS3Bucket"
   };
 //Meme Module Routes Path
 export const MEME_ROUTES ={

@@ -2,31 +2,10 @@ import { USERMODULE } from "@shared/_messages/userModuleMessages.ts";
 import { HTTP_STATUS_CODE } from "@shared/_constants/HttpStatusCodes.ts";
 import ErrorResponse, { SuccessResponse } from "@response/Response.ts";
 
-import * as fs from "node:fs";
-import * as path from "node:path";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import process from "node:process";
+import {PutObjectCommand } from "@aws-sdk/client-s3";
 
-// Create and configure S3 client
-const s3 = new S3Client({
-  region: process.env.AWS_REGION || "us-east-1",
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || ''
-  },
-});
-
-// Helper: Get MIME type based on file extension
-function getMimeType(filePath: string): string {
-  const ext = path.extname(filePath).toLowerCase();
-  const mimeTypes: Record<string, string> = {
-    ".png": "image/png",
-    ".jpg": "image/jpeg",
-    ".jpeg": "image/jpeg",
-    ".gif": "image/gif",
-  };
-  return mimeTypes[ext] || "application/octet-stream";
-}
+import { Buffer } from "node:buffer";
+import s3 from "@shared/_config/AWSConfig.ts";
 
 // Upload profile photo to AWS S3
 export async function uploadUserProfilePhotoToAWSS3(
@@ -34,34 +13,36 @@ export async function uploadUserProfilePhotoToAWSS3(
   _params: Record<string, string>
 ): Promise<Response> {
   try {
-    const { filePath, fileName }: { filePath: string; fileName: string } = await req.json();
-
-    // Validate input
-    if (!filePath || !fileName) {
+    const contentType = req.headers.get("content-type") || "";
+    if (!contentType.includes("multipart/form-data")) {
       return ErrorResponse(
         HTTP_STATUS_CODE.BAD_REQUEST,
-        "Missing filePath or fileName"
+        "Expected multipart/form-data"
       );
     }
 
+    const formData = await req.formData();
+    const file = formData.get("file") as File;
+
+    if (!file || !(file instanceof File)) {
+      return ErrorResponse(
+        HTTP_STATUS_CODE.BAD_REQUEST,
+        "File is missing or invalid in form-data"
+      );
+    }
+
+    const fileName = file.name;
+    // const contentType = file.type || "application/octet-stream";
     const bucketName = "userprofiles2025";
     const key = `uploads/${fileName}`;
 
-    // Check file existence before reading
-    if (!fs.existsSync(filePath)) {
-      return ErrorResponse(
-        HTTP_STATUS_CODE.BAD_REQUEST,
-        `File does not exist at path: ${filePath}`
-      );
-    }
-
-    const fileStream = fs.createReadStream(filePath);
-    const contentType = getMimeType(filePath);
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
 
     const uploadParams = {
       Bucket: bucketName,
       Key: key,
-      Body: fileStream,
+      Body: buffer,
       ContentType: contentType,
     };
 

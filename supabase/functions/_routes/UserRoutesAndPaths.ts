@@ -14,6 +14,7 @@ import updateProfilePhoto from "@handler/_user_module/UpdateProfilePhoto.ts";
 import { updateOTPSettings } from "@handler/_user_module/UpdateOTPSettings.ts";
 import createOTPSettings from "@handler/_user_module/CreateOTPSettings.ts";
 import { DeleteOTPSettingsCriteria } from "@handler/_user_module/DeleteOTPSettingsCriteria.ts";
+import { uploadUserProfilePhotoToAWSS3 } from "@handler/_user_module/uploadUserprofileToS3.ts";
 
 // Mapping all the routes in one place
 export const USER_MODULE_ROUTESs = {
@@ -45,6 +46,14 @@ export const USER_MODULE_ROUTESs = {
             updateOTPSettings,
             [
                 USER_ROLES.ADMIN_ROLE,
+            ]
+        ),
+        [USER_MODULE_ROUTES.UPLOAD_PROFILE_TO_S3_BUCKET]: checkUserAuthentication(
+            uploadUserProfilePhotoToAWSS3,
+            [
+                USER_ROLES.ADMIN_ROLE,
+                USER_ROLES.MEMER_ROLE,
+                USER_ROLES.USER_ROLE
             ]
         )
     },
